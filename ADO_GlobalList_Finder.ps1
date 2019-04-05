@@ -58,5 +58,24 @@ foreach($collection in $sortedCollections) {
             .\witadmin.exe exportwitd /collection:`"$collectionUri`" /p:`"$teamProjectName`" /n:`"$WITName`" /f:$filesStoreLocation\$teamProjectCollectionName_$teamProjectName-$WITName.xml
             Write-Host `"$collectionUri`" /p:`"$teamProjectName`" /n:`"$WITName`" /f:$filesStoreLocation\$teamProjectCollectionName_$teamProjectName-$WITName.xml
         }
+        
+        .\witadmin.exe exportgloballist /collection:`"$collectionUri`" /f:$tempStore\GL_$teamProjectCollectionName.xml
+
+        $collectionGlobalLists = [xml](Get-Content $tempStore\GL_$teamProjectCollectionName.xml)
+
+        #Read all work item defination files
+
+        Get-ChildItem * -Recurse -Filter "*.xml" |
+        ForEach-Object {
+        try
+        {
+            $content = [xml](Get-Content $_.FullName)
+        }
+        catch {}
+
+        $content.selectNodes('//GLOBALLIST') | select name
+
+        } | Export-Csv $tempStore\GL_Found_$teamProjectCollectionName.csv
+        
 
     }
